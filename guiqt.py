@@ -47,19 +47,23 @@ class DarkTheme:
     def apply(app):
         app.setStyle("Fusion")
         palette = QPalette()
-        palette.setColor(QPalette.Window, QColor(53, 53, 53))
-        palette.setColor(QPalette.WindowText, Qt.white)
-        palette.setColor(QPalette.Base, QColor(35, 35, 35))
-        palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
-        palette.setColor(QPalette.ToolTipBase, QColor(25, 25, 25))
-        palette.setColor(QPalette.ToolTipText, Qt.white)
-        palette.setColor(QPalette.Text, Qt.white)
-        palette.setColor(QPalette.Button, QColor(53, 53, 53))
-        palette.setColor(QPalette.ButtonText, Qt.white)
-        palette.setColor(QPalette.BrightText, Qt.red)
-        palette.setColor(QPalette.Link, QColor(42, 130, 218))
-        palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-        palette.setColor(QPalette.HighlightedText, Qt.black)
+        qpalette_list = {
+            QPalette.Window: QColor(53, 53, 53),
+            QPalette.WindowText: Qt.white,
+            QPalette.Base: QColor(35, 35, 35),
+            QPalette.AlternateBase: QColor(53, 53, 53),
+            QPalette.ToolTipBase: QColor(25, 25, 25),
+            QPalette.ToolTipText: Qt.white,
+            QPalette.Text: Qt.white,
+            QPalette.Button: QColor(53, 53, 53),
+            QPalette.ButtonText: Qt.white,
+            QPalette.BrightText: Qt.red,
+            QPalette.Link: QColor(42, 130, 218),
+            QPalette.Highlight: QColor(42, 130, 218),
+            QPalette.HighlightedText: Qt.black
+        }
+        for qpal, color in qpalette_list.items():
+            palette.setColor(qpal, color)
         app.setPalette(palette)
 
 
@@ -319,22 +323,15 @@ class StaffPage(QWidget):
                 self, "Ошибка", f"Не удалось сохранить данные: {str(e)}")
 
     def show_context_menu(self, position):
-        menu = QMenu()
+        action = QMenu().exec_(self.table.viewport().mapToGlobal(position))
 
-        edit_action = menu.addAction("✏️ Редактировать")
-        delete_action = menu.addAction("❌ Удалить")
-        change_task_action = menu.addAction("🔄 Сменить задачу")
-        history_action = menu.addAction("📋 История задач")
-
-        action = menu.exec_(self.table.viewport().mapToGlobal(position))
-
-        if action == edit_action:
+        if action == QMenu().addAction("✏️ Редактировать"):
             self.edit_employee()
-        elif action == delete_action:
+        elif action == QMenu().addAction("❌ Удалить"):
             self.delete_employee()
-        elif action == change_task_action:
+        elif action == QMenu().addAction("🔄 Сменить задачу"):
             self.change_task()
-        elif action == history_action:
+        elif action == QMenu().addAction("📋 История задач"):
             self.view_task_history()
 
 
@@ -372,10 +369,15 @@ class EmployeeDialog(QDialog):
             self.position_completer.setCurrentText(self.employee["position"])
             self.current_task.setText(self.employee["current_task"])
 
-        layout.addRow("ФИО:*", self.full_name)
-        layout.addRow("Дата рождения:*", self.birth_date)
-        layout.addRow("Должность:*", self.position_completer)
-        layout.addRow("Текущая задача:", self.current_task)
+        layout_lines = {
+            "ФИО:*": self.full_name,
+            "Дата рождения:*": self.birth_date,
+            "Должность:*": self.position_completer,
+            "Текущая задача:": self.current_task
+        }
+
+        for srting, var in layout_lines.items():
+            layout.addRow(srting, var)
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
